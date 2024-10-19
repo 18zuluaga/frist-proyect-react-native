@@ -1,14 +1,5 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-// import type { PropsWithChildren } from 'react';
+import React, { useState } from 'react';
 import {
-  Dimensions,
   Image,
   SafeAreaView,
   ScrollView,
@@ -19,193 +10,164 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
-import {
-  Colors,
-} from 'react-native/Libraries/NewAppScreen';
+interface ContactCardProps {
+  name: string;
+  role: string;
+  styles: Record<string, any>;
+}
 
-const { height } = Dimensions.get('window');
-
-// type SectionProps = PropsWithChildren<{
-//   title: string;
-// }>;
-
-// function Section({ children, title }: SectionProps): React.JSX.Element {
-//   const isDarkMode = useColorScheme() === 'dark';
-//   return (
-//     <View style={styles.sectionContainer}>
-//       <Text
-//         style={[
-//           styles.sectionTitle,
-//           {
-//             color: isDarkMode ? Colors.white : Colors.black,
-//           },
-//         ]}>
-//         {title}
-//       </Text>
-//       <Text
-//         style={[
-//           styles.sectionDescription,
-//           {
-//             color: isDarkMode ? Colors.light : Colors.dark,
-//           },
-//         ]}>
-//         {children}
-//       </Text>
-//     </View>
-//   );
-// }
+const ContactCard: React.FC<ContactCardProps> = ({ name, role, styles }) => {
+  return (
+    <View style={styles.contacto}>
+      <Text style={styles.contactName}>{name}</Text>
+      <Text style={styles.contactRole}>{role}</Text>
+    </View>
+  );
+};
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+  const [showContacts, setShowContacts] = useState(true);
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
   const styles = StyleSheet.create({
-    highlight: {
-      fontWeight: '700',
+    container: {
+      flex: 1,
+      backgroundColor: backgroundStyle.backgroundColor,
+      padding: 20,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingBottom: 10,
+      paddingTop: 20,
+      borderBottomWidth: 1,
+      borderBottomColor: isDarkMode ? Colors.light : Colors.dark,
+      backgroundColor: backgroundStyle.backgroundColor,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: !isDarkMode ? Colors.darker : Colors.lighter,
     },
     image: {
       width: 30,
       height: 30,
       resizeMode: 'contain',
     },
-    headerTitle: {
-      flexDirection: 'row', // Cambia a fila
-      alignItems: 'center', // Alinea verticalmente el texto y la imagen
-      justifyContent: 'space-between',
-    },
-    h1: {
-      fontSize: 40,
-      fontWeight: 'bold',
+    searchInput: {
+      borderColor: 'gray',
+      borderWidth: 1,
+      borderRadius: 25,
+      paddingHorizontal: 15,
+      backgroundColor: !isDarkMode ? Colors.lighter : '#333',
       color: !isDarkMode ? Colors.darker : Colors.lighter,
-      marginRight: 10, // Espacio entre el texto y la imagen
+      marginTop: showContacts ? 10 : 0,
+      flex: 1,
     },
-    body: {
-      backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-      height: height,
-      padding: 30,
+    contacto: {
+      backgroundColor: !isDarkMode ? Colors.lighter : '#444',
+      borderRadius: 10,
+      padding: 15,
+      marginBottom: 10,
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    contactName: {
+      fontWeight: '700',
+      fontSize: 18,
       color: !isDarkMode ? Colors.darker : Colors.lighter,
-      gap: 30,
     },
-    header: {
-      flexDirection: 'column',
-      gap: 20,
+    contactRole: {
+      color: 'gray',
+      fontSize: 14,
     },
-    main: {
-      flexDirection: 'column',
-    },
-    Fristcontacto : {
-      borderTopColor: Colors.lightGray,
-      borderTopWidth: 1,
-      borderBottomWidth: 1,
-      padding: 10,
-    },
-    contacto : {
-      borderBottomColor: Colors.lightGray,
-      borderBottomWidth: 1,
-      padding: 10,
+    contentContainer: {
+      marginTop: 10,
     },
   });
 
+  const contacts = [
+    { name: 'Juan', role: 'Cliente' },
+    { name: 'Maria', role: 'Empleador' },
+    { name: 'Pepita', role: 'Cliente' },
+    { name: 'Mama', role: 'Cliente' },
+    { name: 'Jose', role: 'Empleador' },
+    { name: 'Daniel', role: 'Cliente' },
+    { name: 'Jeronimo', role: 'Empleador' },
+    { name: 'Tomas', role: 'Cliente' },
+    { name: 'Jacobo', role: 'Cliente' },
+    { name: 'Angel', role: 'Cliente' },
+    { name: 'Gilberto', role: 'Empleador' },
+    { name: 'Isaac', role: 'Cliente' },
+    { name: 'Cristian', role: 'Empleador' },
+    { name: 'Nicolas', role: 'Cliente' },
+    { name: 'Alfonso', role: 'Empleador' },
+  ];
+
+  const handleScroll = (event: any) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    if (offsetY > 50 && showContacts) {
+      setShowContacts(false);
+    } else if (offsetY <= 50 && !showContacts) {
+      setShowContacts(true);
+    }
+  };
+
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <SafeAreaView style={styles.container}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
+      <View style={styles.header}>
+        {showContacts ? (
+          <Text style={styles.title}>Contactos</Text>
+        ) : (
+          <TextInput
+          placeholder="Buscar contacto"
+          placeholderTextColor="gray"
+          style={styles.searchInput}
+        />
+        )}
+        <Image source={require('./assets/plus.png')} style={styles.image} />
+      </View>
+      {showContacts && (
+        <TextInput
+          placeholder="Buscar contacto"
+          placeholderTextColor="gray"
+          style={styles.searchInput}
+        />
+      )}
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <View style={styles.body}>
-          <View style={styles.header}>
-            <View style={styles.headerTitle}>
-              <Text style={styles.h1}>Contactos</Text>
-              <Image
-                source={require('./assets/plus.png')} // Ruta de la imagen
-                style={styles.image} // Aplicar estilos
-              />
-            </View>
-            <View>
-              <TextInput placeholder="Buscar contacto" style={{ height: 40, borderColor: 'gray', borderWidth: 1, borderRadius: 15 }} />
-            </View>
-          </View>
-          <View style={styles.main}>
-            <View style={styles.Fristcontacto}>
-              <Text style={{fontWeight: '900',}}>
-                Juan
-              </Text>
-            </View>
-            <View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Maria
-              </Text>
-            </View>
-            <View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Pepita
-              </Text>
-            </View>
-            <View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Mama
-              </Text>
-            </View>
-            <View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Jose
-              </Text>
-            </View><View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Daniel
-              </Text>
-            </View><View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Jeronimo
-              </Text>
-            </View><View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Tomas
-              </Text>
-            </View><View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Jacobo
-              </Text>
-            </View><View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Angel
-              </Text>
-            </View><View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Gilberto
-              </Text>
-            </View><View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Isaac
-              </Text>
-            </View><View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Cristian
-              </Text>
-            </View><View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Nicolas
-              </Text>
-            </View><View style={styles.contacto}>
-              <Text style={{fontWeight: '900',}}>
-                Alfonso
-              </Text>
-            </View>
-
-          </View>
-        </View>
+        style={styles.contentContainer}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      >
+        {contacts.map((contact, index) => (
+          <ContactCard
+            key={index}
+            name={contact.name}
+            role={contact.role}
+            styles={styles}
+          />
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-
 
 export default App;
