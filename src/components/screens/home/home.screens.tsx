@@ -11,10 +11,10 @@ import {
   View,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
-import {RootStackParamList} from '../../../../App';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useHomeScreen} from './hook/useHomeScreen';
 import { ContactCard } from './components/contactCard.component';
+import { RootStackParamList } from '../../../navigation/navigation';
 
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<

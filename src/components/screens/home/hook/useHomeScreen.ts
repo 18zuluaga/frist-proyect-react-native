@@ -1,27 +1,12 @@
 import {useState, useEffect} from 'react';
+import { useContact } from '../../../../hook/useContacts';
 
-const contactst = [
-  {name: 'Juan', role: 'Cliente'},
-  {name: 'Maria', role: 'Empleador'},
-  {name: 'Pepita', role: 'Cliente'},
-  {name: 'Mama', role: 'Cliente'},
-  {name: 'Jose', role: 'Empleador'},
-  {name: 'Daniel', role: 'Cliente'},
-  {name: 'Jeronimo', role: 'Empleador'},
-  {name: 'Tomas', role: 'Cliente'},
-  {name: 'Jacobo', role: 'Cliente'},
-  {name: 'Angel', role: 'Cliente'},
-  {name: 'Gilberto', role: 'Empleador'},
-  {name: 'Isaac', role: 'Cliente'},
-  {name: 'Cristiansss', role: 'Empleador'},
-  {name: 'Nicolas', role: 'Cliente'},
-  {name: 'Alfonso', role: 'Empleador'},
-];
 
 export const useHomeScreen = () => {
   const [showContacts, setShowContacts] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [contacts, setContacts] = useState<any[]>(contactst);
+  const  { contacts } = useContact();
+  const [searchcontact, setSearchcontact] = useState<any[]>(contacts);
   const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(
     null,
   );
@@ -42,10 +27,10 @@ export const useHomeScreen = () => {
     }
 
     const timeout = setTimeout(() => {
-      const filteredContacts = contactst.filter(contact =>
+      const filteredContacts = searchcontact.filter(contact =>
         contact.name.toLowerCase().startsWith(name.toLowerCase()),
       );
-      setContacts(filteredContacts);
+      setSearchcontact(filteredContacts);
     }, 3000);
 
     setDebounceTimeout(timeout);
@@ -66,8 +51,7 @@ export const useHomeScreen = () => {
     setSearchQuery,
     handleScroll,
     setShowContacts,
-    contacts,
-    setContacts,
+    contacts: searchcontact,
     handlesearch,
   };
 };
