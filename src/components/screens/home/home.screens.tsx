@@ -28,7 +28,7 @@ interface Props {
 
 export const HomeScreen: React.FC<Props> = ({navigation}) => {
   const isDarkMode = useColorScheme() === 'dark';
-  const {showContacts, handleScroll} = useHomeScreen();
+  const {showContacts, handleScroll, contacts, handlesearch, searchQuery} = useHomeScreen();
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -107,24 +107,6 @@ export const HomeScreen: React.FC<Props> = ({navigation}) => {
     },
   });
 
-  const contacts = [
-    {name: 'Juan', role: 'Cliente'},
-    {name: 'Maria', role: 'Empleador'},
-    {name: 'Pepita', role: 'Cliente'},
-    {name: 'Mama', role: 'Cliente'},
-    {name: 'Jose', role: 'Empleador'},
-    {name: 'Daniel', role: 'Cliente'},
-    {name: 'Jeronimo', role: 'Empleador'},
-    {name: 'Tomas', role: 'Cliente'},
-    {name: 'Jacobo', role: 'Cliente'},
-    {name: 'Angel', role: 'Cliente'},
-    {name: 'Gilberto', role: 'Empleador'},
-    {name: 'Isaac', role: 'Cliente'},
-    {name: 'Cristiansss', role: 'Empleador'},
-    {name: 'Nicolas', role: 'Cliente'},
-    {name: 'Alfonso', role: 'Empleador'},
-  ];
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -135,6 +117,8 @@ export const HomeScreen: React.FC<Props> = ({navigation}) => {
             placeholder="Buscar contacto"
             placeholderTextColor="gray"
             style={styles.searchInput}
+            onChangeText={handlesearch}
+            value={searchQuery}
           />
         )}
         <TouchableOpacity onPress={() => navigation.navigate('CreateContact')}>
@@ -145,7 +129,8 @@ export const HomeScreen: React.FC<Props> = ({navigation}) => {
         </TouchableOpacity>
       </View>
       {showContacts && (
-        <TextInput placeholder="Buscar contacto" style={styles.searchInputs} />
+        <TextInput placeholder="Buscar contacto" style={styles.searchInputs} onChangeText={handlesearch}
+        value={searchQuery}/>
       )}
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
