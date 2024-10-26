@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
-  Image,
   SafeAreaView,
-  ScrollView,
+  SectionList,
   StyleSheet,
   Text,
   TextInput,
@@ -10,12 +9,14 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import {Colors} from 'react-native/Libraries/NewAppScreen';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useHomeScreen} from './hook/useHomeScreen';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useHomeScreen } from './hook/useHomeScreen';
 import { ContactCard } from './components/contactCard.component';
 import { RootStackParamList } from '../../../navigation/navigation';
-
+import { useContacts } from '../../../hook/useContacts';
+import { useFocusEffect } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/AntDesign';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -26,13 +27,20 @@ interface Props {
   navigation: HomeScreenNavigationProp;
 }
 
-export const HomeScreen: React.FC<Props> = ({navigation}) => {
+export const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const isDarkMode = useColorScheme() === 'dark';
-  const {showContacts, handleScroll, contacts, handlesearch, searchQuery} = useHomeScreen();
+  const { showContacts, handleScroll } = useHomeScreen();
+  const { handlesearch, groupedContacts, searchQuery, loadContacts } = useContacts();
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadContacts();
+    }, [loadContacts])
+  );
 
   const styles = StyleSheet.create({
     container: {
@@ -55,11 +63,6 @@ export const HomeScreen: React.FC<Props> = ({navigation}) => {
       fontWeight: 'bold',
       color: !isDarkMode ? Colors.darker : Colors.lighter,
     },
-    image: {
-      width: 30,
-      height: 30,
-      resizeMode: 'contain',
-    },
     searchInput: {
       borderColor: 'gray',
       borderWidth: 1,
@@ -69,15 +72,6 @@ export const HomeScreen: React.FC<Props> = ({navigation}) => {
       color: !isDarkMode ? Colors.darker : Colors.lighter,
       marginTop: showContacts ? 10 : 0,
       width: '90%',
-    },
-    searchInputs: {
-      borderColor: 'gray',
-      borderWidth: 1,
-      borderRadius: 25,
-      paddingHorizontal: 15,
-      backgroundColor: !isDarkMode ? Colors.lighter : '#333',
-      color: !isDarkMode ? Colors.darker : Colors.lighter,
-      marginTop: showContacts ? 10 : 0,
     },
     contacto: {
       backgroundColor: !isDarkMode ? Colors.lighter : '#444',
@@ -96,6 +90,12 @@ export const HomeScreen: React.FC<Props> = ({navigation}) => {
     contactName: {
       fontWeight: '700',
       fontSize: 18,
+      color: !isDarkMode ? Colors.darker : Colors.lighter,
+    },
+    contactTitle: {
+      fontWeight: '700',
+      fontSize: 18,
+      marginBottom: 10,
       color: !isDarkMode ? Colors.darker : Colors.lighter,
     },
     contactRole: {
@@ -122,30 +122,37 @@ export const HomeScreen: React.FC<Props> = ({navigation}) => {
           />
         )}
         <TouchableOpacity onPress={() => navigation.navigate('CreateContact')}>
-          <Image
-            source={require('../../../../assets/plus.png')}
-            style={styles.image}
-          />
+          <Icon name="plus" size={30} color={'#000'} />
         </TouchableOpacity>
       </View>
       {showContacts && (
-        <TextInput placeholder="Buscar contacto" style={styles.searchInputs} onChangeText={handlesearch}
-        value={searchQuery}/>
+        <TextInput
+          placeholder="Buscar contacto"
+          style={styles.searchInput}
+          onChangeText={handlesearch}
+          value={searchQuery}
+        />
       )}
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={styles.contentContainer}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}>
-        {contacts.map((contact, index) => (
+      <SectionList
+        sections={groupedContacts()}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
           <ContactCard
-            key={index}
-            name={contact.name}
-            role={contact.role}
+            name={item.name}
+            role={item.role}
             styles={styles}
+            handle={() => navigation.navigate('SingleContact', { contact: item })}
           />
-        ))}
-      </ScrollView>
+        )}
+        renderSectionHeader={({ section: { title } }) => (
+          <Text style={styles.contactTitle}>
+            {title}
+          </Text>
+        )}
+        contentInsetAdjustmentBehavior="automatic"
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      />
     </SafeAreaView>
   );
 };

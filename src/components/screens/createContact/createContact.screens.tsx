@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -7,34 +7,57 @@ import {
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
+  Image,
 } from 'react-native';
 import {useForm, Controller} from 'react-hook-form';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../../navigation/navigation';
-import { useContact } from '../../../hook/useContacts';
-
-interface FormData {
-  name: string;
-  role: 'Cliente' | 'Empleado';
-  phoneNumber: string;
-}
+import {useContacts} from '../../../hook/useContacts';
+import {Contact} from '../../../interface/contact.interface';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import  Icon  from 'react-native-vector-icons/Entypo';
 
 export const CreateContactScreen: React.FC = () => {
   const {
     control,
     handleSubmit,
     formState: {errors},
-  } = useForm<FormData>();
-  const {addContact} = useContact();
-
+  } = useForm<Contact>();
+  const {addContact} = useContacts();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const [imageUri, setImageUri] = useState<string | undefined>();
 
-  const onSubmit = (data: FormData) => {
-    addContact(data);
+  const onSubmit = (data: Contact) => {
+    addContact({...data, image: imageUri});
+    navigation.navigate('Home');
   };
 
   const handleCancel = () => {
     navigation.navigate('Home');
+  };
+
+  const selectImage = () => {
+    launchImageLibrary({mediaType: 'photo'}, response => {
+      if (response.didCancel) {
+        console.log('Usuario canceló la selección de imagen.');
+      } else if (response.assets) {
+        setImageUri(response.assets[0].uri);
+      } else {
+        console.log('Error en la selección de imagen.');
+      }
+    });
+  };
+
+  const takePhoto = () => {
+    launchCamera({mediaType: 'photo'}, response => {
+      if (response.didCancel) {
+        console.log('Usuario canceló la captura de foto.');
+      } else if (response.assets) {
+        setImageUri(response.assets[0].uri);
+      } else {
+        console.log('Error al tomar la foto.');
+      }
+    });
   };
 
   return (
@@ -43,6 +66,19 @@ export const CreateContactScreen: React.FC = () => {
       style={styles.background}>
       <View style={styles.container}>
         <Text style={styles.title}>Agregar Contacto</Text>
+
+        <View style={styles.imageContainer}>
+          {imageUri ? (
+            <Image source={{uri: imageUri}} style={styles.imagePreview} />
+          ) : (
+            <TouchableOpacity style={styles.imagePreview}>
+              <Icon name="images" size={35}></Icon>
+              <Text style={{fontSize:15}}>Agregar imagen</Text>
+            </TouchableOpacity>
+          )}
+          <Button title="Seleccionar Imagen" onPress={selectImage} />
+          <Button title="Tomar Foto" onPress={takePhoto} />
+        </View>
 
         <Controller
           control={control}
@@ -61,6 +97,34 @@ export const CreateContactScreen: React.FC = () => {
         />
         {errors.name && (
           <Text style={styles.error}>El nombre es requerido.</Text>
+        )}
+
+        <Controller
+          control={control}
+          rules={{
+            required: true,
+            pattern: {
+              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+              message: 'Email inválido',
+            },
+          }}
+          name="email"
+          render={({field: {onChange, onBlur, value}}) => (
+            <TextInput
+              style={styles.input}
+              placeholder="Correo Electrónico"
+              keyboardType="email-address"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              placeholderTextColor="#888"
+            />
+          )}
+        />
+        {errors.email && (
+          <Text style={styles.error}>
+            {errors.email.message || 'El correo es requerido.'}
+          </Text>
         )}
 
         <Controller
@@ -99,7 +163,7 @@ export const CreateContactScreen: React.FC = () => {
               message: 'Número inválido',
             },
           }}
-          name="phoneNumber"
+          name="number"
           render={({field: {onChange, onBlur, value}}) => (
             <TextInput
               style={styles.input}
@@ -107,14 +171,14 @@ export const CreateContactScreen: React.FC = () => {
               keyboardType="numeric"
               onBlur={onBlur}
               onChangeText={onChange}
-              value={value}
+              value={value ? value.toString() : ''}
               placeholderTextColor="#888"
             />
           )}
         />
-        {errors.phoneNumber && (
+        {errors.number && (
           <Text style={styles.error}>
-            {errors.phoneNumber.message || 'El número es requerido.'}
+            {errors.number.message || 'El número es requerido.'}
           </Text>
         )}
 
@@ -127,11 +191,7 @@ export const CreateContactScreen: React.FC = () => {
         </View>
 
         <View style={styles.cancelButtonContainer}>
-          <Button
-            title="Cancelar"
-            onPress={handleCancel}
-            color="#ff4444" // Color rojo para el botón de cancelar
-          />
+          <Button title="Cancelar" onPress={handleCancel} color="#ff4444" />
         </View>
       </View>
     </ImageBackground>
@@ -200,6 +260,23 @@ const styles = StyleSheet.create({
   cancelButtonContainer: {
     marginTop: 10,
     alignItems: 'flex-end',
+  },
+  imageContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  imagePreview: {
+    width: 150,
+    height: 150,
+    borderRadius: 100,
+    gap: 10,
+    backgroundColor: '#ccc',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imagePlaceholder: {
+    color: '#888',
+    marginBottom: 10,
   },
 });
 
